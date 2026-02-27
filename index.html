@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr. Hadi Keramati — Generative AI for Engineering Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@300;400;500&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0f14;
+    --paper: #f5f0e8;
+    --amber: #d4830a;
+    --amber-light: #f0a830;
+    --steel: #8a9bb0;
+    --mist: #c8d4e0;
+    --accent: #1a4a6b;
+    --accent2: #2d6a8f;
+    --line: rgba(212,131,10,0.25);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    --font-body: 'Crimson Pro', Georgia, serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--mist);
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── CANVAS HERO ── */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+
+  #particle-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .hero-text { }
+
+  .hero-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 4vw, 4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--paper);
+    margin-bottom: 0.4rem;
+  }
+
+  .name-italic {
+    font-style: italic;
+    color: var(--amber-light);
+  }
+
+  .hero-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--steel);
+    margin-bottom: 1.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-bio {
+    font-size: 1.05rem;
+    color: var(--mist);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    max-width: 520px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .stat {
+    border-left: 2px solid var(--amber);
+    padding-left: 1rem;
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--amber-light);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+  }
+  .btn-primary {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  .btn-primary:hover {
+    background: var(--amber);
+    color: var(--ink);
+  }
+  .btn-ghost {
+    border-color: rgba(138,155,176,0.4);
+    color: var(--steel);
+  }
+  .btn-ghost:hover {
+    border-color: var(--mist);
+    color: var(--mist);
+  }
+
+  /* ── HERO VISUAL PANEL ── */
+  .hero-visual {
+    position: relative;
+  }
+  .code-card {
+    background: rgba(13,15,20,0.85);
+    border: 1px solid rgba(212,131,10,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  .code-header {
+    background: rgba(212,131,10,0.1);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(212,131,10,0.15);
+  }
+  .code-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .code-title {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--steel);
+    margin-left: 0.5rem;
+    letter-spacing: 0.08em;
+  }
+  .code-body {
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 2;
+  }
+  .kw { color: #7ec8e3; }
+  .fn { color: var(--amber-light); }
+  .str { color: #7dd98a; }
+  .cm { color: #556677; }
+  .num { color: #d4a0e8; }
+  .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: var(--amber);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 1px;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(13,15,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212,131,10,0.1);
+    transition: all 0.3s;
+  }
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--steel);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--amber-light); }
+
+  /* ── SECTIONS ── */
+  section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 3rem;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    color: var(--paper);
+    margin-bottom: 3rem;
+    line-height: 1.2;
+  }
+
+  /* ── RESEARCH VISION ── */
+  #vision {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .vision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  .vision-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(138,155,176,0.15);
+    border-top: 2px solid var(--amber);
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .vision-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(212,131,10,0.05) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .vision-card:hover::before { opacity: 1; }
+  .vision-card:hover { border-color: rgba(212,131,10,0.5); transform: translateY(-3px); }
+  .vision-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+  .vision-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--paper);
+    margin-bottom: 0.6rem;
+  }
+  .vision-card p {
+    font-size: 0.95rem;
+    color: var(--steel);
+    line-height: 1.7;
+  }
+
+  /* ── JOURNEY ── */
+  #journey { }
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--amber), transparent);
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid rgba(138,155,176,0.08);
+  }
+  .tl-item:last-child { border-bottom: none; margin-bottom: 0; }
+  .tl-dot {
+    position: absolute;
+    left: -2rem;
+    top: 0.4rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--amber);
+    transform: translateX(-4.5px);
+    box-shadow: 0 0 0 4px rgba(212,131,10,0.15);
+  }
+  .tl-date {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .tl-role {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--paper);
+    margin-bottom: 0.2rem;
+  }
+  .tl-org {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--steel);
+    margin-bottom: 0.8rem;
+  }
+  .tl-desc {
+    font-size: 0.97rem;
+    color: var(--mist);
+    line-height: 1.75;
+    max-width: 680px;
+  }
+  .tl-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid rgba(212,131,10,0.3);
+    color: var(--amber);
+    border-radius: 2px;
+  }
+
+  /* ── PUBLICATIONS ── */
+  #publications { border-top: 1px solid var(--line); }
+  .pub-filter {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid rgba(138,155,176,0.25);
+    color: var(--steel);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--amber);
+    color: var(--amber);
+    background: rgba(212,131,10,0.07);
+  }
+  .pub-list { display: flex; flex-direction: column; gap: 1px; }
+  .pub-item {
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid transparent;
+    padding: 1.5rem 2rem;
+    transition: all 0.25s;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: start;
+    border-bottom: 1px solid rgba(138,155,176,0.06);
+  }
+  .pub-item:hover {
+    background: rgba(212,131,10,0.04);
+    border-left-color: var(--amber);
+  }
+  .pub-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: rgba(212,131,10,0.5);
+    padding-top: 0.2rem;
+    min-width: 1.8rem;
+  }
+  .pub-body { }
+  .pub-title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--paper);
+    line-height: 1.4;
+    margin-bottom: 0.35rem;
+  }
+  .pub-meta {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--steel);
+    letter-spacing: 0.04em;
+  }
+  .pub-badge {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    white-space: nowrap;
+    align-self: center;
+  }
+  .badge-journal { background: rgba(125,217,138,0.1); color: #7dd98a; border: 1px solid rgba(125,217,138,0.2); }
+  .badge-conf { background: rgba(126,200,227,0.1); color: #7ec8e3; border: 1px solid rgba(126,200,227,0.2); }
+  .badge-review { background: rgba(240,168,48,0.1); color: var(--amber-light); border: 1px solid rgba(240,168,48,0.2); }
+  .badge-patent { background: rgba(212,160,232,0.1); color: #d4a0e8; border: 1px solid rgba(212,160,232,0.2); }
+  .pub-item.hidden { display: none; }
+
+  /* ── SKILLS ── */
+  #skills { border-top: 1px solid var(--line); }
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .skill-group h3 {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(212,131,10,0.2);
+  }
+  .skill-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 0.3rem 0.7rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(138,155,176,0.15);
+    color: var(--mist);
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .chip:hover {
+    background: rgba(212,131,10,0.06);
+    border-color: rgba(212,131,10,0.3);
+    color: var(--amber-light);
+  }
+
+  /* ── AWARDS ── */
+  #awards { border-top: 1px solid var(--line); }
+  .award-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .award-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+    border: 1px solid rgba(138,155,176,0.08);
+    background: rgba(255,255,255,0.015);
+    transition: all 0.25s;
+  }
+  .award-item:hover {
+    border-color: rgba(212,131,10,0.3);
+    background: rgba(212,131,10,0.04);
+  }
+  .award-icon { color: var(--amber); font-size: 1.1rem; margin-top: 0.1rem; }
+  .award-text {
+    font-size: 0.92rem;
+    color: var(--mist);
+    line-height: 1.5;
+  }
+  .award-year {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--steel);
+    margin-top: 0.2rem;
+  }
+
+  /* ── CONTACT ── */
+  #contact {
+    border-top: 1px solid var(--line);
+    text-align: center;
+  }
+  .contact-inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .contact-inner p {
+    font-size: 1.05rem;
+    color: var(--steel);
+    margin-bottom: 2.5rem;
+    line-height: 1.8;
+  }
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 4rem;
+  }
+  .contact-item {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--steel);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid rgba(138,155,176,0.15);
+  }
+  .contact-item:hover { color: var(--amber-light); border-color: var(--amber); }
+  footer {
+    text-align: center;
+    padding: 2rem 3rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: rgba(138,155,176,0.4);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero-content { grid-template-columns: 1fr; gap: 2rem; }
+    .hero-visual { display: none; }
+    .vision-grid, .skills-grid { grid-template-columns: 1fr; }
+    .award-grid { grid-template-columns: 1fr; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1rem; }
+    section { padding: 4rem 1.5rem; }
+    .hero-content { padding: 5rem 1.5rem 3rem; }
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-logo" href="#hero">hadi.keramati</a>
+  <ul class="nav-links">
+    <li><a href="#vision">Research</a></li>
+    <li><a href="#journey">Journey</a></li>
+    <li><a href="#publications">Publications</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="particle-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-tag">Postdoctoral Researcher · UBC</div>
+      <h1>Dr. Hadi<br><span class="name-italic">Keramati</span></h1>
+      <div class="hero-subtitle">// generative_ai_for_engineering_design.py</div>
+      <p class="hero-bio">
+        I build AI systems that <em>design</em> — fusing diffusion models, reinforcement learning, and physics-based simulation to automate and reimagine how complex engineering systems are created. From ship hulls to drug molecules, I explore the frontier where generative AI meets the physical world.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">453</div>
+          <div class="stat-label">Citations</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">8</div>
+          <div class="stat-label">h-index</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">22+</div>
+          <div class="stat-label">Publications</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">1</div>
+          <div class="stat-label">US Patent</div>
+        </div>
+      </div>
+      <div class="hero-links">
+        <a href="mailto:hadi.keramati@ubc.ca" class="btn btn-primary">✉ Get in Touch</a>
+        <a href="https://scholar.google.com" target="_blank" class="btn btn-ghost">Scholar ↗</a>
+        <a href="https://github.com" target="_blank" class="btn btn-ghost">GitHub ↗</a>
+        <a href="https://linkedin.com" target="_blank" class="btn btn-ghost">LinkedIn ↗</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#febc2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span class="code-title">reward_diffusion.py</span>
+        </div>
+        <div class="code-body">
+          <div><span class="cm"># Guided diffusion for inverse design</span></div>
+          <div><span class="kw">class</span> <span class="fn">RewardDiffusion</span>(nn.Module):</div>
+          <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span>(self, design_space):</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;self.score_net = <span class="fn">UNet</span>(design_space)</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;self.reward_fn = <span class="fn">PhysicsSimulator</span>()</div>
+          <div>&nbsp;&nbsp;</div>
+          <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">sample</span>(self, constraints):</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># Denoise toward high-reward region</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;x = <span class="fn">torch.randn</span>(self.shape)</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span> t <span class="kw">in</span> self.timesteps:</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;∇r = self.reward_fn.<span class="fn">grad</span>(x, t)</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x = self.<span class="fn">step</span>(x, t, ∇r)</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> x <span class="cm"># optimized design</span></div>
+          <div>&nbsp;</div>
+          <div><span class="cm"># Applications: heat sinks, ship hulls,</span></div>
+          <div><span class="cm"># drug molecules, aerospace structures</span></div>
+          <div>&nbsp;</div>
+          <div>model = <span class="fn">RewardDiffusion</span>(<span class="str">"3D"</span>).<span class="fn">train</span>()<span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section id="vision">
+  <div class="section-label">Research Vision</div>
+  <h2>Engineering meets<br><em style="font-style:italic; color: var(--amber-light)">Generative Intelligence</em></h2>
+  <div class="vision-grid fade-in">
+    <div class="vision-card">
+      <span class="vision-icon">⟳</span>
+      <h3>Inverse Design via Diffusion</h3>
+      <p>Reframing engineering design as a guided generative process — using reward-directed diffusion models to navigate complex, constrained design spaces toward physically optimal solutions.</p>
+    </div>
+    <div class="vision-card">
+      <span class="vision-icon">⚛</span>
+      <h3>Physics-Aware AI</h3>
+      <p>Embedding thermodynamic constraints, fluid dynamics, and structural mechanics directly into neural architectures — surrogates and samplers that respect the laws governing the physical world.</p>
+    </div>
+    <div class="vision-card">
+      <span class="vision-icon">◈</span>
+      <h3>Reinforcement Learning for Design</h3>
+      <p>Training autonomous agents that iteratively refine engineering geometries, from heat exchangers to offshore jackets, using multi-agent cooperative RL and shaped reward landscapes.</p>
+    </div>
+    <div class="vision-card">
+      <span class="vision-icon">⬡</span>
+      <h3>Cross-Domain Transfer</h3>
+      <p>Developing foundation models for design that transfer across domains — marine engineering, semiconductor cooling, molecular discovery — by learning universal geometry-performance relationships.</p>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section id="journey">
+  <div class="section-label">Career Journey</div>
+  <h2>From fluid mechanics<br>to <em style="font-style:italic; color: var(--amber-light)">generative machines</em></h2>
+  <div class="timeline fade-in">
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2025 — Present</div>
+      <div class="tl-role">Postdoctoral Researcher</div>
+      <div class="tl-org">University of British Columbia · Vancouver, BC</div>
+      <div class="tl-desc">
+        Building end-to-end generative 3D design pipelines by fine-tuning and guiding foundation diffusion models. Applications span marine engineering, semiconductor design, aerospace structures, and molecular drug discovery. Introducing GPU-efficient inference-time optimization via geometric particle expansion.
+      </div>
+      <div class="tl-tags">
+        <span class="tag">Diffusion Models</span>
+        <span class="tag">Ship Hull Optimization</span>
+        <span class="tag">Drug Discovery</span>
+        <span class="tag">Foundation Models</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2022 — Present</div>
+      <div class="tl-role">VP of Research</div>
+      <div class="tl-org">Magnative AI</div>
+      <div class="tl-desc">
+        Co-founded and led research at an AI startup commercializing physics-based generative design. Secured $250K in funding, deployed parallelized deep RL pipelines on AWS, and prototyped an LLM-based interaction layer for engineering design software.
+      </div>
+      <div class="tl-tags">
+        <span class="tag">Deep RL</span>
+        <span class="tag">AWS / SageMaker</span>
+        <span class="tag">LLM Integration</span>
+        <span class="tag">$250K Funded</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2022 — 2024</div>
+      <div class="tl-role">Postdoc / Entrepreneur in Residence</div>
+      <div class="tl-org">University of Waterloo</div>
+      <div class="tl-desc">
+        Commercialized a physics-based AI software package with customers worldwide. Secured NSERC I2I grants. Led development of a 3D mathematical design pipeline and supervised a cross-functional team including postdocs, PhD students, master's students, and interns.
+      </div>
+      <div class="tl-tags">
+        <span class="tag">NSERC I2I</span>
+        <span class="tag">Commercialization</span>
+        <span class="tag">Team Leadership</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2018 — 2022</div>
+      <div class="tl-role">PhD Research — 4.0 GPA</div>
+      <div class="tl-org">University of Waterloo</div>
+      <div class="tl-desc">
+        Pioneered generative thermal design using boundary representation and deep reinforcement learning. Awarded the President's Graduate Scholarship (2 consecutive years). Thesis work became the seed for a US patent and multiple high-impact journal papers.
+      </div>
+      <div class="tl-tags">
+        <span class="tag">Deep RL</span>
+        <span class="tag">Thermal Design</span>
+        <span class="tag">US Patent</span>
+        <span class="tag">PGS Award</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2017 — 2018</div>
+      <div class="tl-role">Research Assistant</div>
+      <div class="tl-org">University of Maryland, College Park</div>
+      <div class="tl-desc">
+        Designed and experimentally tested additively manufactured heat exchangers for aerospace applications (ARPA-E $1.8M project with Boeing). Operated DMLS metal 3D printing systems and won best TA award.
+      </div>
+      <div class="tl-tags">
+        <span class="tag">Metal AM</span>
+        <span class="tag">ARPA-E</span>
+        <span class="tag">Boeing</span>
+        <span class="tag">Aerospace</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PUBLICATIONS -->
+<section id="publications">
+  <div class="section-label">Selected Publications</div>
+  <h2>22 papers, 1 patent,<br><em style="font-style:italic; color: var(--amber-light)">453 citations</em></h2>
+
+  <div class="pub-filter">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="journal">Journal</button>
+    <button class="filter-btn" data-filter="conference">Conference</button>
+    <button class="filter-btn" data-filter="review">Under Review</button>
+    <button class="filter-btn" data-filter="patent">Patent</button>
+  </div>
+
+  <div class="pub-list fade-in">
+
+    <div class="pub-item" data-type="review">
+      <div class="pub-num">11</div>
+      <div class="pub-body">
+        <div class="pub-title">Inference-Time Reward Alignment of Diffusion Models via Geometric Particle Expansion</div>
+        <div class="pub-meta">Keramati, Taghvaei, Jaiman · Transactions on Machine Learning Research · 2026</div>
+      </div>
+      <span class="pub-badge badge-review">Under Review</span>
+    </div>
+
+    <div class="pub-item" data-type="journal">
+      <div class="pub-num">1</div>
+      <div class="pub-body">
+        <div class="pub-title">A Reward-Directed Diffusion Framework for Generative Design</div>
+        <div class="pub-meta">Keramati, Kirchen, Hannan, Jaiman · Engineering Applications of Artificial Intelligence · 2026</div>
+      </div>
+      <span class="pub-badge badge-journal">Journal</span>
+    </div>
+
+    <div class="pub-item" data-type="journal">
+      <div class="pub-num">2</div>
+      <div class="pub-body">
+        <div class="pub-title">HeatGen: A Guided Diffusion Framework for Multiphysics Heat Sink Design Optimization</div>
+        <div class="pub-meta">Keramati, Sadeghi, Jaiman · International Journal of Heat and Mass Transfer · 2026</div>
+      </div>
+      <span class="pub-badge badge-journal">Journal</span>
+    </div>
+
+    <div class="pub-item" data-type="review">
+      <div class="pub-num">12</div>
+      <div class="pub-body">
+        <div class="pub-title">A Parametric Diffusion Model for Localized Generative Optimization of Ship Hulls</div>
+        <div class="pub-meta">Keramati et al. · Ocean Engineering · 2026</div>
+      </div>
+      <span class="pub-badge badge-review">Under Review</span>
+    </div>
+
+    <div class="pub-item" data-type="journal">
+      <div class="pub-num">5</div>
+      <div class="pub-body">
+        <div class="pub-title">Deep Convolutional Surrogates and Freedom in Thermal Design</div>
+        <div class="pub-meta">Keramati, Hamdullahpur · Energy and AI · 2023</div>
+      </div>
+      <span class="pub-badge badge-journal">Journal</span>
+    </div>
+
+    <div class="pub-item" data-type="journal">
+      <div class="pub-num">6</div>
+      <div class="pub-body">
+        <div class="pub-title">Deep Reinforcement Learning for Heat Exchanger Shape Optimization</div>
+        <div class="pub-meta">Keramati, Hamdullahpur, Barzegari · Int. J. Heat and Mass Transfer · 2022</div>
+      </div>
+      <span class="pub-badge badge-journal">Journal</span>
+    </div>
+
+    <div class="pub-item" data-type="patent">
+      <div class="pub-num">13</div>
+      <div class="pub-body">
+        <div class="pub-title">System and Method for Heat Exchanger Shape Optimization</div>
+        <div class="pub-meta">Keramati, Hamdullahpur · U.S. Patent No. 11,995,380 · Issued May 28, 2024</div>
+      </div>
+      <span class="pub-badge badge-patent">US Patent</span>
+    </div>
+
+    <div class="pub-item" data-type="conference">
+      <div class="pub-num">15</div>
+      <div class="pub-body">
+        <div class="pub-title">Accelerated Portfolio Optimization and Option Pricing with Reinforcement Learning</div>
+        <div class="pub-meta">Keramati, Jazayeri · ICLR 2025 Workshop on Advances in Financial AI</div>
+      </div>
+      <span class="pub-badge badge-conf">Conference</span>
+    </div>
+
+    <div class="pub-item" data-type="conference">
+      <div class="pub-num">16</div>
+      <div class="pub-body">
+        <div class="pub-title">Reward-Guided Diffusion Model for Data-Driven Black-Box Design Optimization</div>
+        <div class="pub-meta">Keramati, Jaiman · ICLR 2025 Workshop on Deep Generative Models</div>
+      </div>
+      <span class="pub-badge badge-conf">Conference</span>
+    </div>
+
+    <div class="pub-item" data-type="conference">
+      <div class="pub-num">17</div>
+      <div class="pub-body">
+        <div class="pub-title">A Novel Ship Design Optimization Framework Using Fine-Tuned and Reward-Directed Diffusion Model</div>
+        <div class="pub-meta">Keramati, Kirchen, Jaiman · ASME OMAE 2025</div>
+      </div>
+      <span class="pub-badge badge-conf">Conference</span>
+    </div>
+
+    <div class="pub-item" data-type="conference">
+      <div class="pub-num">19</div>
+      <div class="pub-body">
+        <div class="pub-title">Generative Thermal Design Through Boundary Representation and Multi-Agent Cooperative Environment</div>
+        <div class="pub-meta">Keramati, Hamdullahpur · ICML 2022 Workshop on ML in Computational Design</div>
+      </div>
+      <span class="pub-badge badge-conf">Conference</span>
+    </div>
+
+    <div class="pub-item" data-type="journal">
+      <div class="pub-num">7</div>
+      <div class="pub-body">
+        <div class="pub-title">Analytical Solutions for Thermo-Fluidic Transport in Electroosmotic Flow Through Rough Microtubes</div>
+        <div class="pub-meta">Keramati et al. · Int. J. Heat and Mass Transfer · 2016</div>
+      </div>
+      <span class="pub-badge badge-journal">Journal</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">Technical Expertise</div>
+  <h2>Tools of the<br><em style="font-style:italic; color: var(--amber-light)">trade</em></h2>
+  <div class="skills-grid fade-in">
+    <div class="skill-group">
+      <h3>Machine Learning</h3>
+      <div class="skill-chips">
+        <span class="chip">PyTorch</span>
+        <span class="chip">TensorFlow</span>
+        <span class="chip">JAX</span>
+        <span class="chip">Diffusion Models</span>
+        <span class="chip">Transformers</span>
+        <span class="chip">Scikit-learn</span>
+        <span class="chip">XGBoost</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <h3>Reinforcement Learning</h3>
+      <div class="skill-chips">
+        <span class="chip">Ray RLlib</span>
+        <span class="chip">Stable-Baselines3</span>
+        <span class="chip">OpenAI Gym</span>
+        <span class="chip">Multi-Agent RL</span>
+        <span class="chip">PyTorch RL</span>
+        <span class="chip">PPO / SAC / DDPG</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <h3>Languages & Platforms</h3>
+      <div class="skill-chips">
+        <span class="chip">Python</span>
+        <span class="chip">C++</span>
+        <span class="chip">SQL</span>
+        <span class="chip">AWS (EC2/S3/SageMaker)</span>
+        <span class="chip">GCP</span>
+        <span class="chip">Docker</span>
+        <span class="chip">FastAPI</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <h3>Physics Simulation</h3>
+      <div class="skill-chips">
+        <span class="chip">OpenFOAM</span>
+        <span class="chip">FEniCS</span>
+        <span class="chip">Firedrake</span>
+        <span class="chip">FreeFEM</span>
+        <span class="chip">LBM</span>
+        <span class="chip">OpenCASCADE</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <h3>MLOps & Infrastructure</h3>
+      <div class="skill-chips">
+        <span class="chip">W&B</span>
+        <span class="chip">MLflow</span>
+        <span class="chip">Airflow</span>
+        <span class="chip">Ray</span>
+        <span class="chip">Optuna</span>
+        <span class="chip">Linux / Unix</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <h3>Manufacturing & Robotics</h3>
+      <div class="skill-chips">
+        <span class="chip">Metal AM / DMLS</span>
+        <span class="chip">ROS</span>
+        <span class="chip">Arduino</span>
+        <span class="chip">CAD</span>
+        <span class="chip">G-code</span>
+        <span class="chip">3D X-ray Imaging</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AWARDS -->
+<section id="awards">
+  <div class="section-label">Honors & Recognition</div>
+  <h2>A record of<br><em style="font-style:italic; color: var(--amber-light)">achievement</em></h2>
+  <div class="award-grid fade-in">
+    <div class="award-item">
+      <span class="award-icon">⬡</span>
+      <div>
+        <div class="award-text">President's Graduate Scholarship (PGS)</div>
+        <div class="award-year">University of Waterloo · 2020–2022</div>
+      </div>
+    </div>
+    <div class="award-item">
+      <span class="award-icon">✦</span>
+      <div>
+        <div class="award-text">ICLR 2025 Travel Grant Award</div>
+        <div class="award-year">RBC Borealis AI · 2025</div>
+      </div>
+    </div>
+    <div class="award-item">
+      <span class="award-icon">◈</span>
+      <div>
+        <div class="award-text">ASHRAE Grant-in-Aid Award</div>
+        <div class="award-year">ASHRAE · 2018–2019</div>
+      </div>
+    </div>
+    <div class="award-item">
+      <span class="award-icon">⬡</span>
+      <div>
+        <div class="award-text">Best Teaching Assistant Award</div>
+        <div class="award-year">Dept. of Mechanical Engineering, UMD · 2017</div>
+      </div>
+    </div>
+    <div class="award-item">
+      <span class="award-icon">✦</span>
+      <div>
+        <div class="award-text">Best Thesis Nomination — Kharazmi International Festival</div>
+        <div class="award-year">Iran · 2014</div>
+      </div>
+    </div>
+    <div class="award-item">
+      <span class="award-icon">◈</span>
+      <div>
+        <div class="award-text">First Rank, Graduation Class — Departmental GPA Record</div>
+        <div class="award-year">Babol Noshirvani University · 2012</div>
+      </div>
+    </div>
+    <div class="award-item">
+      <span class="award-icon">⬡</span>
+      <div>
+        <div class="award-text">Research Project Award</div>
+        <div class="award-year">Iran's National Elite Foundation</div>
+      </div>
+    </div>
+    <div class="award-item">
+      <span class="award-icon">✦</span>
+      <div>
+        <div class="award-text">ARPA-E IDEAS Program ($1.79M, Boeing + UMD)</div>
+        <div class="award-year">Contributor · 2017–2018</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="section-label" style="justify-content: center;">Contact</div>
+    <h2>Let's build the<br><em style="font-style:italic; color: var(--amber-light)">future of design</em></h2>
+    <p>
+      I'm open to collaborations on generative AI for engineering, industrial partnerships, and conversations about the frontier of physics-informed machine learning.
+    </p>
+    <div class="contact-links">
+      <a href="mailto:hadi.keramati@ubc.ca" class="contact-item">✉ hadi.keramati@ubc.ca</a>
+      <a href="https://github.com" target="_blank" class="contact-item">⬡ GitHub</a>
+      <a href="https://linkedin.com" target="_blank" class="contact-item">◈ LinkedIn</a>
+      <a href="https://scholar.google.com" target="_blank" class="contact-item">✦ Google Scholar</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Dr. Hadi Keramati · Vancouver, BC · hadi.keramati@ubc.ca
+</footer>
+
+<script>
+// ── PARTICLE CANVAS (diffusion-inspired) ──
+(function() {
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], connections = [];
+  const N = 80;
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function mkParticle() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      r: Math.random() * 1.5 + 0.5,
+      noise: Math.random() * Math.PI * 2,
+      noiseSpeed: (Math.random() * 0.005 + 0.002),
+      alpha: Math.random() * 0.5 + 0.2
+    };
+  }
+
+  function init() {
+    resize();
+    particles = Array.from({length: N}, mkParticle);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Update
+    for (let p of particles) {
+      p.noise += p.noiseSpeed;
+      p.vx += Math.cos(p.noise) * 0.01;
+      p.vy += Math.sin(p.noise) * 0.01;
+      const speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+      if (speed > 0.5) { p.vx *= 0.5/speed; p.vy *= 0.5/speed; }
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < -5) p.x = W + 5;
+      if (p.x > W + 5) p.x = -5;
+      if (p.y < -5) p.y = H + 5;
+      if (p.y > H + 5) p.y = -5;
+    }
+
+    // Connections
+    const maxDist = 110;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < maxDist) {
+          const alpha = (1 - d/maxDist) * 0.15;
+          ctx.strokeStyle = `rgba(212,131,10,${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Dots
+    for (let p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(212,131,10,${p.alpha})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); });
+  init();
+  draw();
+})();
+
+// ── PUB FILTER ──
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const filter = this.dataset.filter;
+    document.querySelectorAll('.pub-item').forEach(item => {
+      if (filter === 'all' || item.dataset.type === filter) {
+        item.classList.remove('hidden');
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+  });
+});
+
+// ── SCROLL ANIMATIONS ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ── TYPED EFFECT in hero (cycling keywords) ──
+(function() {
+  const words = ['heat sink design', 'ship hull optimization', 'drug molecule generation', 'thermal systems', 'offshore structures'];
+  const el = document.querySelector('.hero-subtitle');
+  if (!el) return;
+  let wi = 0, ci = 0, deleting = false, text = '';
+  function type() {
+    const word = words[wi];
+    if (!deleting) {
+      text = word.slice(0, ++ci);
+      if (ci === word.length) { deleting = true; setTimeout(type, 1600); return; }
+    } else {
+      text = word.slice(0, --ci);
+      if (ci === 0) { deleting = false; wi = (wi + 1) % words.length; }
+    }
+    el.textContent = '// ' + text + '_';
+    setTimeout(type, deleting ? 40 : 75);
+  }
+  setTimeout(type, 1200);
+})();
+</script>
+</body>
+</html>
